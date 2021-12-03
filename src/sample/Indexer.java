@@ -4,14 +4,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-import org.apache.lucene.analysis.*;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -20,12 +19,14 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.AttributeFactory;
 
 public class Indexer {
+
     private IndexWriter writer;
+
     public Indexer(String indexDirectoryPath) throws IOException {
         //this directory will contain the indexes
         Path indexPath = Paths.get(indexDirectoryPath);
@@ -36,13 +37,14 @@ public class Indexer {
         Directory indexDirectory = FSDirectory.open(indexPath);
         //create the indexer
         IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
+
+        //config.setOpenMode( IndexWriterConfig.OpenMode.CREATE );                    //Overriding the original index in the folder
         writer = new IndexWriter(indexDirectory, config);
     }
     public void close() throws CorruptIndexException, IOException {
         writer.close();
     }
     private Document getDocument(File file) throws IOException {
-
         Document document = new Document();
         //index file contents
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -87,7 +89,7 @@ public class Indexer {
             currentLine = currentLine.toLowerCase();
 
             //Stopwords Removal and tokenization from body
-            if (lineCounter >= 2) {
+            if (lineCounter >= 2) {         //-----------> <BODY>
                 final String CONTENTS = "contents";
                 //Remove below comments for custom stopwords
                 //final List<String> stopWords = Arrays.asList("short","test");
@@ -101,6 +103,18 @@ public class Indexer {
                     tokenStream.reset();
                     while(tokenStream.incrementToken()) {
                         System.out.print("[" + term.toString() + "] ");
+
+                        if(term.toString() != "") {
+                            Field contentField = new Field(LuceneConstants.CONTENTS, term.toString(), TextField.TYPE_STORED);
+                            //index file name
+                            Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
+                            //index file path
+                            Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
+
+                            document.add(contentField);
+                            document.add(fileNameField);
+                            document.add(filePathField);
+                        }
                     }
                     tokenStream.close();
                     analyzer.close();
@@ -109,32 +123,34 @@ public class Indexer {
                     e.printStackTrace();
                 }
             }
+            else {                      //-----------> <PLACES>, <PEOPLE>, <TITLE>
+                if(currentLine != "") {
+                    Field contentField = new Field(LuceneConstants.CONTENTS, currentLine, TextField.TYPE_STORED);
+                    //index file name
+                    Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
+                    //index file path
+                    Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
+
+                    document.add(contentField);
+                    document.add(fileNameField);
+                    document.add(filePathField);
+                }
+            }
 
             System.out.println("Current===>"+currentLine);
 
-            if(currentLine!=""){
-                Field contentField = new Field(LuceneConstants.CONTENTS, currentLine, TextField.TYPE_STORED);
-                //index file name
-                Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
-                //index file path
-                Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
-
-                document.add(contentField);
-                document.add(fileNameField);
-                document.add(filePathField);
-            }
             lineCounter++;
         }
-
-        //String currentLine =br.readLine().toString();
 
         br.close();
         return document;
     }
     private void indexFile(File file) throws IOException {
-        System.out.println("Indexing "+file.getCanonicalPath());
-        Document document = getDocument(file);
-        writer.addDocument(document);
+        System.out.println("Indexing: " + file.getCanonicalPath());
+
+        //addDocument(file);
+        //deleteDocument(file);
+        updateDocument(file);
     }
     public int createIndex(String dataDirPath, FileFilter filter) throws
             IOException {
@@ -151,5 +167,21 @@ public class Indexer {
             }
         }
         return writer.numRamDocs();
+    }
+
+    public void updateDocument(File file) throws IOException {
+        Document document = getDocument(file);
+        writer.updateDocument(new Term(LuceneConstants.FILE_NAME, file.getName()), document);
+    }
+    public void addDocument(File file) throws IOException {
+        Document document = getDocument(file);
+        writer.addDocument(document);
+        writer.commit();
+    }
+    public void deleteDocument(File file) throws IOException {
+        //delete indexes for a file
+        writer.deleteDocuments(new Term(LuceneConstants.FILE_PATH,file.getPath()));
+        writer.commit();
+        System.out.println("index contains deleted files: " + writer.hasDeletions());
     }
 }

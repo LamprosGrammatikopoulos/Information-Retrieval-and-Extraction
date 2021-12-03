@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="BorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <top>
+      <TextField id="SearchText" fx:id="SearchText" BorderPane.alignment="CENTER" />
+   </top>
+   <left>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" onAction="#Add" prefHeight="25.0" prefWidth="100.0" text="Add file(s)" />
+            <Button mnemonicParsing="false" onAction="#Delete" prefHeight="25.0" prefWidth="100.0" text="Delete file(s)" />
+            <Button mnemonicParsing="false" onAction="#Edit" prefHeight="25.0" prefWidth="100.0" text="Edit file" />
+            <Button mnemonicParsing="false" onAction="#Update" prefHeight="25.0" prefWidth="100.0" text="Update file" />
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <TextArea fx:id="TextPlace" prefHeight="200.0" prefWidth="200.0" text="" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>
