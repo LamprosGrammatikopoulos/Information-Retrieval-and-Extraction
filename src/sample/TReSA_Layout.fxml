@@ -4,11 +4,12 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 
+
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <top>
-      <TextField id="SearchText" fx:id="SearchText" BorderPane.alignment="CENTER" />
+      <TextField fx:id="SearchText" BorderPane.alignment="CENTER" />
    </top>
-   <bottom>
-      <Button mnemonicParsing="false" onAction="#Button" prefHeight="30.0" prefWidth="30.0" text="Button" />
-   </bottom>
+   <center>
+      <Button mnemonicParsing="false" onAction="#Search" text="Button" BorderPane.alignment="CENTER" />
+   </center>
 </BorderPane>
