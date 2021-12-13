@@ -1,11 +1,5 @@
 package sample;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.TokenStream;
@@ -22,6 +16,12 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.tartarus.snowball.ext.EnglishStemmer;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Indexer {
 
@@ -51,9 +51,12 @@ public class Indexer {
 
         String currentLine ="";
         int lineCounter = 0;
+
         while ((currentLine = br.readLine()) != null) {
 
             currentLine = currentLine.toString();
+
+            System.out.println("Current===>"+currentLine);
 
             //Tags Removal
             //Supposing that <PLACES></PLACES>, <PEOPLE></PEOPLE>, <TITLE></TITLE> are one line each
@@ -83,29 +86,41 @@ public class Indexer {
             }
 
             //Punctuation Removal
-            currentLine = currentLine.replaceAll("[^a-zA-Z0-9 ]*", "");
+            //Leave dates, time, words adn decimal number intact
+            currentLine = currentLine.replaceAll("([^0-9a-zA-Z]*[\\.,:\\\\-][^0-9a-zA-Z>]+)|([^0-9a-zA-Z\\n][\\.,:\\\\-][^0-9a-zA-Z]*)", " ");
+            currentLine = currentLine.replaceAll("([~!@#$%^&*()_+={}\\[\\]\\;\\'\\\"\\<\\>\\|\\/\\?]*)", "");
 
             //Case Folding
             currentLine = currentLine.toLowerCase();
 
-            //Stopwords Removal and tokenization from body
-            if (lineCounter >= 2) {         //-----------> <BODY>
+            //Stopwords Removal from body and tokenization at body
+            System.out.print("After tokenization ==>> ");
+            if (lineCounter > 2) {         //-----------> <BODY>
                 final String CONTENTS = "contents";
-                //Remove below comments for custom stopwords
-                //final List<String> stopWords = Arrays.asList("short","test");
-                //final CharArraySet stopSet = new CharArraySet(stopWords, true);
-                CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
-                //stopSet.addAll(enStopSet);
                 try {
+                    //Remove below comments for custom stopwords
+                    //final List<String> stopWords = Arrays.asList("short","test");
+                    //final CharArraySet stopSet = new CharArraySet(stopWords, true);
+                    CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
+                    //stopSet.addAll(enStopSet);
                     Analyzer analyzer = new StandardAnalyzer(enStopSet); //stopSet for custom stopwords
                     TokenStream tokenStream = analyzer.tokenStream(CONTENTS, new StringReader(currentLine));
                     CharTermAttribute term = tokenStream.addAttribute(CharTermAttribute.class);
                     tokenStream.reset();
                     while(tokenStream.incrementToken()) {
-                        System.out.print("[" + term.toString() + "] ");
+
+                        //Stemming in body
+                        EnglishStemmer stemmer = new EnglishStemmer();
+                        stemmer.setCurrent(term.toString());
+                        stemmer.stem();
+                        String tmp = stemmer.getCurrent();
+
+
+                        System.out.print("[" + tmp + "] ");
+
 
                         if(term.toString() != "") {
-                            Field contentField = new Field(LuceneConstants.CONTENTS, term.toString(), TextField.TYPE_STORED);
+                            Field contentField = new Field(LuceneConstants.CONTENTS, tmp, TextField.TYPE_STORED);
                             //index file name
                             Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
                             //index file path
@@ -137,7 +152,7 @@ public class Indexer {
                 }
             }
 
-            System.out.println("Current===>"+currentLine);
+            System.out.println();
 
             lineCounter++;
         }
@@ -147,9 +162,6 @@ public class Indexer {
     }
     private void indexFile(File file) throws IOException {
         System.out.println("Indexing: " + file.getCanonicalPath());
-
-        //addDocument(file);
-        //deleteDocument(file);
         updateDocument(file);
     }
     public int createIndex(String dataDirPath, FileFilter filter) throws
