@@ -6,6 +6,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 public class Main extends Application {
 
     @Override
@@ -18,7 +20,17 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-        LuceneTester.main(args);
+
+        //Creating the index when the program starts
+        LuceneTester tester;
+        try {
+            tester = new LuceneTester();
+            tester.createIndex();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
         launch(args);
     }
 }

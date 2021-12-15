@@ -1,10 +1,11 @@
 package sample;
 
+import javafx.collections.FXCollections;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.tartarus.snowball.ext.EnglishStemmer;
+import javafx.collections.ObservableList;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,33 +15,13 @@ import java.nio.file.Paths;
 
 
 public class LuceneTester {
+
     static String indexDir = "res/Index";
     String dataDir = "res/Data";
     static Indexer indexer;
     Searcher searcher;
 
-    public static void main(String[] args) {
-        LuceneTester tester;
-        try {
-            tester = new LuceneTester();
-            tester.createIndex();
-            String input = "continued";
-
-            EnglishStemmer stemmer = new EnglishStemmer();
-            stemmer.setCurrent(input);
-            stemmer.stem();
-            String tmp = stemmer.getCurrent();
-
-            tester.search(tmp);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-    private void createIndex() throws IOException {
+    public void createIndex() throws IOException {
         indexer = new Indexer(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
@@ -50,18 +31,23 @@ public class LuceneTester {
         System.out.println(numIndexed+" File(s) indexed, time taken: " + (endTime-startTime)+" ms");
     }
 
-    public void search(String searchQuery) throws IOException, ParseException {
+    public  ObservableList search(String searchQuery) throws IOException, ParseException {
         searcher = new Searcher(indexDir);
         long startTime = System.currentTimeMillis();
         TopDocs hits = searcher.search(searchQuery);
         long endTime = System.currentTimeMillis();
 
+        ObservableList observableList = FXCollections.observableArrayList();
+
         System.out.println(hits.totalHits +" documents found. Time :" + (endTime - startTime));
         for(ScoreDoc scoreDoc : hits.scoreDocs) {
             Document doc = searcher.getDocument(scoreDoc);
             System.out.println("File: " + doc.get(LuceneConstants.FILE_PATH));
+
+            observableList.add(doc.get(LuceneConstants.FILE_PATH));
         }
         searcher.close();
+        return  observableList;
     }
 
     public static void deleteFile(String str) throws IOException {

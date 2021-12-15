@@ -88,7 +88,7 @@ public class Indexer {
             //Punctuation Removal
             //Leave dates, time, words adn decimal number intact
             currentLine = currentLine.replaceAll("([^0-9a-zA-Z]*[\\.,:\\\\-][^0-9a-zA-Z>]+)|([^0-9a-zA-Z\\n][\\.,:\\\\-][^0-9a-zA-Z]*)", " ");
-            currentLine = currentLine.replaceAll("([~!@#$%^&*()_+={}\\[\\]\\;\\'\\\"\\<\\>\\|\\/\\?]*)", "");
+            currentLine = currentLine.replaceAll("([~!@#$%^&*()_+={}\\[\\]\\;\\'\\\"\\<\\>\\|\\?]*)", "");
 
             //Case Folding
             currentLine = currentLine.toLowerCase();
@@ -115,18 +115,19 @@ public class Indexer {
                         stemmer.stem();
                         String tmp = stemmer.getCurrent();
 
-
                         System.out.print("[" + tmp + "] ");
 
-
                         if(term.toString() != "") {
-                            Field contentField = new Field(LuceneConstants.CONTENTS, tmp, TextField.TYPE_STORED);
+
+                            //index file contents
+                            Field bodyField = new Field(LuceneConstants.BODY, tmp, TextField.TYPE_STORED);
+                            document.add(bodyField);
+
                             //index file name
                             Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
                             //index file path
                             Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
 
-                            document.add(contentField);
                             document.add(fileNameField);
                             document.add(filePathField);
                         }
@@ -140,13 +141,26 @@ public class Indexer {
             }
             else {                      //-----------> <PLACES>, <PEOPLE>, <TITLE>
                 if(currentLine != "") {
-                    Field contentField = new Field(LuceneConstants.CONTENTS, currentLine, TextField.TYPE_STORED);
+
+                    //index file contents
+                    if (lineCounter==0) {
+                        Field placesField = new Field(LuceneConstants.PLACES, currentLine, TextField.TYPE_STORED);
+                        document.add(placesField);
+                    }
+                    else if(lineCounter==1) {
+                        Field peopleField = new Field(LuceneConstants.PEOPLE, currentLine, TextField.TYPE_STORED);
+                        document.add(peopleField);
+                    }
+                    else {
+                        Field titleField = new Field(LuceneConstants.TITLE, currentLine, TextField.TYPE_STORED);
+                        document.add(titleField);
+                    }
                     //index file name
                     Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
                     //index file path
                     Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
 
-                    document.add(contentField);
+
                     document.add(fileNameField);
                     document.add(filePathField);
                 }

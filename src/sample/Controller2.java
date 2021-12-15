@@ -47,7 +47,7 @@ public class Controller2 {
     @FXML
     public  void Cancel(ActionEvent event) {
         Stage stage;
-        stage=(Stage)TextArea.getScene().getWindow();
+        stage = (Stage)TextArea.getScene().getWindow();
         stage.close();
     }
 }
