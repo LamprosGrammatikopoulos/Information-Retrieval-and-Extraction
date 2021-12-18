@@ -7,10 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -34,25 +31,21 @@ public class Controller{
     private TextField SearchText;
 
     @FXML
+    private TextField TopK;
+
+    @FXML
     private AnchorPane AnchorPane;
 
     @FXML
-    private CheckBox Places;
-    @FXML
-    private CheckBox People;
-    @FXML
-    private CheckBox Title;
-    @FXML
-    private CheckBox Body;
-
+    private CheckBox Places, People, Title, Body;
 
     @FXML
     private Button closeHelpButton;
 
-    public static boolean varPlaces = true;
-    public static boolean varPeople = true;
-    public static boolean varTitle = true;
-    public static boolean varBody = true;
+    public static boolean varPlaces = true, varPeople = true, varTitle = true, varBody = true;
+
+    public static int intTopK = 0;
+
 
 
     @FXML
@@ -79,69 +72,100 @@ public class Controller{
     @FXML
     public void Check(ActionEvent event) {
 
-        //Check selected tag
-        if (Places.isSelected()) {
-            varPlaces = true;
+        if (Places.isSelected() || People.isSelected() || Title.isSelected() || Body.isSelected()) {
+            //Check selected tag
+            if (Places.isSelected()) {
+                varPlaces = true;
+            } else {
+                varPlaces = false;
+            }
+            if (People.isSelected()) {
+                varPeople = true;
+            } else {
+                varPeople = false;
+            }
+            if (Title.isSelected()) {
+                varTitle = true;
+            } else {
+                varTitle = false;
+            }
+            if (Body.isSelected()) {
+                varBody = true;
+            } else {
+                varBody = false;
+            }
         }
         else {
-            varPlaces = false;
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("Error");
+            a.setContentText("Please select one of more fields to search.");
+            a.showAndWait();
         }
-        if (People.isSelected()) {
-            varPeople = true;
-        }
-        else {
-            varPeople = false;
-        }
-        if (Title.isSelected()) {
-            varTitle = true;
-        }
-        else {
-            varTitle = false;
-        }
-        if (Body.isSelected()) {
-            varBody = true;
-        }
-        else {
-            varBody = false;
-        }
+
     }
 
     @FXML
     public void Search(ActionEvent event) {
 
-        LuceneTester tester;
-        try {
+        if (TopK.getText().matches("^[0-9]+$")) {
 
-            String query = "";
+            intTopK = Integer.parseInt(TopK.getText());
 
-            //Problem when query has more than 2 words "billion national" ------> "billion n"
-            //Stemmer receives word by word a phrase
-            if((SearchText.getText().contains(" ") && SearchText.getLength()>1)) {
-                query = SearchText.getText() + " ";
+            LuceneTester LuceneTester;
+            try {
+
+                String query = "";
+
+                //Problem when query has more than 2 words "billion national" ------> "billion n"
+                //Stemmer receives word by word a phrase
+                if((SearchText.getText().contains(" ") && SearchText.getLength()>1)) {
+                    query = SearchText.getText() + " ";
+                }
+                else {
+                    query = SearchText.getText();
+                }
+
+                if (SearchText.getText().matches("([\"]?[0-9a-zA-Z ]+[-.,:\\/][0-9a-zA-Z]+[-.,:\\/][0-9a-zA-Z ]+[\"]?)|([\"]?[0-9a-zA-Z ]+[-.,:\\/][0-9a-zA-Z ]+[\"]?)|([\"]?[0-9a-zA-Z ]+[\"]?)")) {
+                    LuceneTester = new LuceneTester();
+                    EnglishStemmer stemmer = new EnglishStemmer();
+                    stemmer.setCurrent(query);
+                    stemmer.stem();
+                    String tmp = stemmer.getCurrent();
+
+                    if (tmp.contains("/")) {
+                        tmp = tmp.replaceAll("/", ";");
+                    }
+                    if (tmp.contains(":")) {
+                        tmp = tmp.replaceAll(":", ";");
+                    }
+
+                    System.out.println("stemQuery==>"+tmp);
+
+                    observableList = LuceneTester.search(tmp, intTopK);
+                    ListView.setItems(observableList);
+                }
+                else {
+                    Alert a = new Alert(Alert.AlertType.ERROR);
+                    a.setTitle("Error");
+                    a.setContentText("Please give a supported query (find supported queries at \"Help\").");
+                    a.showAndWait();
+                }
             }
-            else {
-                query = SearchText.getText();
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+            catch (ParseException e) {
+                e.printStackTrace();
             }
 
-            if (query != "") {
-                tester = new LuceneTester();
-                EnglishStemmer stemmer = new EnglishStemmer();
-                stemmer.setCurrent(query);
-                stemmer.stem();
-                String tmp = stemmer.getCurrent();
+        }
+        else {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("Error");
+            a.setContentText("Please give an integer in \"Top-k results\" field.");
+            a.showAndWait();
+        }
 
-                System.out.println("stemQuery==>"+tmp);
-
-                observableList = tester.search(tmp);
-                ListView.setItems(observableList);
-            }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        catch (ParseException e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML

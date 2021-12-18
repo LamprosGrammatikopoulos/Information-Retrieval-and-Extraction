@@ -90,8 +90,12 @@ public class Indexer {
 
             //Punctuation Removal
             //Leave dates, time, words adn decimal number intact
-            currentLine = currentLine.replaceAll("([^0-9a-zA-Z]*[\\.,:\\\\-][^0-9a-zA-Z>]+)|([^0-9a-zA-Z\\n]+[\\.,:\\\\-][^0-9a-zA-Z]*)", " ");
+            currentLine = currentLine.replaceAll("([^0-9a-zA-Z]*[\\.,][^0-9a-zA-Z>]+)|([^0-9a-zA-Z\\n]+[\\.,][^0-9a-zA-Z]*)", " ");
             currentLine = currentLine.replaceAll("([~!@#$%^&*()_+={}\\[\\]\\;\\'\\\"\\<\\>\\|\\?]*)", "");
+            //Date
+            currentLine = currentLine.replaceAll("/", ";");
+            //Time
+            currentLine = currentLine.replaceAll(":", ";");
 
             System.out.println("Current===>"+currentLine);
 
@@ -101,12 +105,11 @@ public class Indexer {
             //Stopwords Removal from body and tokenization at body
             System.out.print("After tokenization ==>> ");
             if (lineCounter > 2) {         //-----------> <BODY>
-                final String CONTENTS = "contents";
                 try {
                     //CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
                     //stopSet.addAll(enStopSet);
                     Analyzer analyzer = new WhitespaceAnalyzer();
-                    TokenStream tokenStream = analyzer.tokenStream(CONTENTS, new StringReader(currentLine));
+                    TokenStream tokenStream = analyzer.tokenStream(LuceneConstants.BODY, new StringReader(currentLine));
                     CharTermAttribute term = tokenStream.addAttribute(CharTermAttribute.class);
                     tokenStream.reset();
                     while(tokenStream.incrementToken()) {
@@ -136,8 +139,8 @@ public class Indexer {
                     }
                     tokenStream.close();
                     analyzer.close();
-                } catch (IOException e) {
-                    System.out.println("Exception:n");
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
             }

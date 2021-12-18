@@ -29,22 +29,22 @@
             <Font size="18.0" />
          </font>
       </Label>
-      <Label layoutX="27.0" layoutY="281.0" text="OR operator:">
+      <Label layoutX="27.0" layoutY="267.0" text="OR operator:">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Label layoutX="27.0" layoutY="336.0" text="NOT operator:">
+      <Label layoutX="27.0" layoutY="307.0" text="NOT operator:">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Label layoutX="27.0" layoutY="439.0" text="phrases (match exact text):">
+      <Label layoutX="27.0" layoutY="394.0" text="phrases (match exact text):">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Label layoutX="27.0" layoutY="493.0" text="parenthesis between operators (specify priority):">
+      <Label layoutX="26.0" layoutY="436.0" text="parenthesis between operators (specify priority):">
          <font>
             <Font size="18.0" />
          </font>
@@ -54,87 +54,87 @@
             <Font size="18.0" />
          </font>
       </Text>
-      <Text layoutX="477.0" layoutY="301.0" strokeType="OUTSIDE" strokeWidth="0.0" text="word OR word " wrappingWidth="245.13671875">
+      <Text layoutX="477.0" layoutY="287.0" strokeType="OUTSIDE" strokeWidth="0.0" text="word OR word " wrappingWidth="245.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Text layoutX="477.0" layoutY="356.0" strokeType="OUTSIDE" strokeWidth="0.0" text="word NOT word " wrappingWidth="245.13671875">
+      <Text layoutX="477.0" layoutY="327.0" strokeType="OUTSIDE" strokeWidth="0.0" text="word NOT word " wrappingWidth="245.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Text layoutX="477.0" layoutY="459.0" strokeType="OUTSIDE" strokeWidth="0.0" text="&quot;search this exact text&quot;" wrappingWidth="245.13671875">
+      <Text layoutX="477.0" layoutY="414.0" strokeType="OUTSIDE" strokeWidth="0.0" text="&quot;search this exact text&quot;" wrappingWidth="245.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Text layoutX="477.0" layoutY="513.0" strokeType="OUTSIDE" strokeWidth="0.0" text="((word OR word ) AND word ) NOT word " wrappingWidth="371.13671875">
+      <Text layoutX="476.0" layoutY="456.0" strokeType="OUTSIDE" strokeWidth="0.0" text="((word OR word ) AND word ) NOT word " wrappingWidth="371.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Label layoutX="27.0" layoutY="387.0" text="combination of operators:">
+      <Label layoutX="26.0" layoutY="349.0" text="combination of operators:">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Text layoutX="477.0" layoutY="407.0" strokeType="OUTSIDE" strokeWidth="0.0" text="word OR word AND word " wrappingWidth="306.13671875">
+      <Text layoutX="476.0" layoutY="369.0" strokeType="OUTSIDE" strokeWidth="0.0" text="word OR word AND word " wrappingWidth="306.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Label layoutX="27.0" layoutY="556.0" text="search in one or more parts of articles (4 options): ">
+      <Label layoutX="27.0" layoutY="479.0" text="search in one or more parts of articles (4 options): ">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <CheckBox disable="true" layoutX="476.0" layoutY="556.0" mnemonicParsing="false" selected="true">
+      <CheckBox disable="true" layoutX="477.0" layoutY="479.0" mnemonicParsing="false" selected="true">
          <font>
             <Font size="18.0" />
          </font>
       </CheckBox>
-      <Label layoutX="27.0" layoutY="614.0" text="search the top-k related articles to your query:  ">
+      <Label layoutX="27.0" layoutY="522.0" text="search the top-k related articles to your query:  ">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Text layoutX="477.0" layoutY="634.0" strokeType="OUTSIDE" strokeWidth="0.0" text="write the k number" wrappingWidth="245.13671875">
+      <Text layoutX="477.0" layoutY="542.0" strokeType="OUTSIDE" strokeWidth="0.0" text="fill the k number" wrappingWidth="245.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Text layoutX="513.0" layoutY="575.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Places/People/Title/Contents" wrappingWidth="371.13671875">
+      <Text layoutX="513.0" layoutY="498.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Places/People/Title/Contents" wrappingWidth="371.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Label layoutX="27.0" layoutY="670.0" text="search decimal numbers:">
+      <Label layoutX="26.0" layoutY="564.0" text="search decimal numbers:">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Text layoutX="477.0" layoutY="690.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ex1: 1,655.8  ex2: 872.0  ex3: 200,000" wrappingWidth="306.13671875">
+      <Text layoutX="476.0" layoutY="584.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ex1: 1,655.8  ex2: 872.0  ex3: 200,000" wrappingWidth="306.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Label layoutX="27.0" layoutY="717.0" text="search dates:">
+      <Label layoutX="27.0" layoutY="607.0" text="search dates:">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Text layoutX="476.0" layoutY="737.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ex1: 7/1/82  ex2: 8-5-82" wrappingWidth="245.13671875">
+      <Text layoutX="477.0" layoutY="627.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ex1: 7/1/82  ex2: 07/01/82  ex3:07/01/1982" wrappingWidth="371.13671875">
          <font>
             <Font size="18.0" />
          </font>
       </Text>
-      <Label layoutX="27.0" layoutY="752.0" text="search time:">
+      <Label layoutX="27.0" layoutY="647.0" text="search time:">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Text layoutX="476.0" layoutY="772.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ex1: " wrappingWidth="245.13671875">
+      <Text layoutX="477.0" layoutY="667.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ex1: 03:05:23  ex2: 3:5:23" wrappingWidth="245.13671875">
          <font>
             <Font size="18.0" />
          </font>

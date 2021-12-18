@@ -31,10 +31,10 @@ public class LuceneTester {
         System.out.println(numIndexed+" File(s) indexed, time taken: " + (endTime-startTime)+" ms");
     }
 
-    public  ObservableList search(String searchQuery) throws IOException, ParseException {
+    public  ObservableList search(String searchQuery, int TopK) throws IOException, ParseException {
         searcher = new Searcher(indexDir);
         long startTime = System.currentTimeMillis();
-        TopDocs hits = searcher.search(searchQuery);
+        TopDocs hits = searcher.search(searchQuery, TopK);
         long endTime = System.currentTimeMillis();
 
         ObservableList observableList = FXCollections.observableArrayList();
