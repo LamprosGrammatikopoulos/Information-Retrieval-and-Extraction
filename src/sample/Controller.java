@@ -7,9 +7,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
@@ -44,13 +44,37 @@ public class Controller{
     private CheckBox Title;
     @FXML
     private CheckBox Body;
+
+
     @FXML
-    private RadioButton StrictSearch;
+    private Button closeHelpButton;
 
     public static boolean varPlaces = true;
     public static boolean varPeople = true;
     public static boolean varTitle = true;
     public static boolean varBody = true;
+
+
+    @FXML
+    public void CloseHelp(ActionEvent event) {
+        Stage stage;
+        stage = (Stage)closeHelpButton.getScene().getWindow();
+        stage.close();
+    }
+
+    @FXML
+    public void Help(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Help-popup.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+        }
+        catch (IOException e){
+            System.out.println("errorHelp");
+        }
+    }
 
     @FXML
     public void Check(ActionEvent event) {
@@ -189,17 +213,56 @@ public class Controller{
                 //index file contents
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 String currentLine = "";
-                while ((currentLine = br.readLine()) != null) {
-                    tmp = tmp + currentLine + "\n";
-                }
-                br.close();
+                String bodyText = "";
 
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("Edit-popup.fxml"));
                 Parent root = loader.load();
-
                 Controller2 scene2controller = loader.getController();
 
-                scene2controller.showInfos(tmp,choosenFile);
+                int lineCounter = 0;
+                while ((currentLine = br.readLine()) != null) {
+
+                    currentLine = currentLine.toString();
+
+                    //Tags Removal
+                    //Supposing that <PLACES></PLACES>, <PEOPLE></PEOPLE>, <TITLE></TITLE> are one line each
+                    //First line in txt (<PLACES></PLACES>)
+                    if(lineCounter == 0) {
+                        currentLine = currentLine.substring(8,currentLine.length()-9);
+                        scene2controller.fillPlaces(currentLine,choosenFile);
+                    }
+                    //Second line in txt (<PEOPLE></PEOPLE>)
+                    else if(lineCounter == 1) {
+                        currentLine = currentLine.substring(8,currentLine.length()-9);
+                        scene2controller.fillPeople(currentLine,choosenFile);
+                    }
+                    //Third line in txt (<TITLE></TITLE>)
+                    else if(lineCounter == 2) {
+                        currentLine = currentLine.substring(7,currentLine.length()-8);
+                        scene2controller.fillTitle(currentLine,choosenFile);
+                    }
+                    //Fourth line in txt (<BODY></BODY>)
+                    else if(lineCounter == 3 && currentLine.contains("</BODY>")) {
+                        currentLine = currentLine.substring(6,currentLine.length()-7);
+                        bodyText=bodyText+currentLine+"\n";
+                        scene2controller.fillBody(bodyText,choosenFile);
+                        break;
+                    }
+                    //Last line in txt (<BODY>)
+                    else if (lineCounter >= 3 && !currentLine.contains("</BODY>")) {
+                        if (currentLine.contains("<BODY>")) {
+                            currentLine = currentLine.substring(6);
+                        }
+                        bodyText=bodyText+currentLine+"\n";
+                    }
+                    //Last line in txt (</BODY>)
+                    else if (currentLine.contains("\u0003</BODY>")) {
+                        scene2controller.fillBody(bodyText,choosenFile);
+                        break;
+                    }
+
+                    lineCounter++;
+                }
 
                 Stage stage = new Stage();
                 stage.setScene(new Scene(root));
@@ -214,7 +277,6 @@ public class Controller{
             System.out.println("An ERROR occurred while editing the file!");
         }
     }
-
 }
 
 

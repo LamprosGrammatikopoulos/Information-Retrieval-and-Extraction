@@ -1,9 +1,8 @@
 package sample;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
@@ -56,7 +55,7 @@ public class Indexer {
 
             currentLine = currentLine.toString();
 
-            System.out.println("Current===>"+currentLine);
+            //System.out.println("Current===>"+currentLine);
 
             //Tags Removal
             //Supposing that <PLACES></PLACES>, <PEOPLE></PEOPLE>, <TITLE></TITLE> are one line each
@@ -75,6 +74,7 @@ public class Indexer {
             //Fourth line in txt (<BODY></BODY>)
             else if(lineCounter == 3 && currentLine.contains("</BODY>")) {
                 currentLine = currentLine.substring(5,currentLine.length()-7);
+                break;
             }
             //Last line in txt (<BODY>)
             else if (lineCounter == 3 && !currentLine.contains("</BODY>")) {
@@ -85,10 +85,15 @@ public class Indexer {
                 break;
             }
 
+            //Readline removes \n so we add a space character in order for the regex to work when . or , is the last character before \n
+            currentLine = currentLine + " ";
+
             //Punctuation Removal
             //Leave dates, time, words adn decimal number intact
-            currentLine = currentLine.replaceAll("([^0-9a-zA-Z]*[\\.,:\\\\-][^0-9a-zA-Z>]+)|([^0-9a-zA-Z\\n][\\.,:\\\\-][^0-9a-zA-Z]*)", " ");
+            currentLine = currentLine.replaceAll("([^0-9a-zA-Z]*[\\.,:\\\\-][^0-9a-zA-Z>]+)|([^0-9a-zA-Z\\n]+[\\.,:\\\\-][^0-9a-zA-Z]*)", " ");
             currentLine = currentLine.replaceAll("([~!@#$%^&*()_+={}\\[\\]\\;\\'\\\"\\<\\>\\|\\?]*)", "");
+
+            System.out.println("Current===>"+currentLine);
 
             //Case Folding
             currentLine = currentLine.toLowerCase();
@@ -98,12 +103,9 @@ public class Indexer {
             if (lineCounter > 2) {         //-----------> <BODY>
                 final String CONTENTS = "contents";
                 try {
-                    //Remove below comments for custom stopwords
-                    //final List<String> stopWords = Arrays.asList("short","test");
-                    //final CharArraySet stopSet = new CharArraySet(stopWords, true);
-                    CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
+                    //CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
                     //stopSet.addAll(enStopSet);
-                    Analyzer analyzer = new StandardAnalyzer(enStopSet); //stopSet for custom stopwords
+                    Analyzer analyzer = new WhitespaceAnalyzer();
                     TokenStream tokenStream = analyzer.tokenStream(CONTENTS, new StringReader(currentLine));
                     CharTermAttribute term = tokenStream.addAttribute(CharTermAttribute.class);
                     tokenStream.reset();
@@ -139,7 +141,8 @@ public class Indexer {
                     e.printStackTrace();
                 }
             }
-            else {                      //-----------> <PLACES>, <PEOPLE>, <TITLE>
+            //<PLACES>, <PEOPLE>, <TITLE>
+            else {
                 if(currentLine != "") {
 
                     //index file contents
