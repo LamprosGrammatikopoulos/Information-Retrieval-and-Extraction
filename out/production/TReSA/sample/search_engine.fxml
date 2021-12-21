@@ -36,7 +36,6 @@
               <Font size="18.0" />
            </font>
         </Button>
-        <ListView fx:id="ListView" layoutX="27.0" layoutY="217.0" prefHeight="553.0" prefWidth="1161.0" />
         <TextField fx:id="SearchText" layoutX="221.0" layoutY="43.0" prefHeight="35.0" prefWidth="469.0" promptText="Search here">
          <font>
             <Font size="14.0" />
@@ -66,5 +65,6 @@
             <Font size="18.0" />
          </font>
       </Hyperlink>
+      <ListView fx:id="ListView" layoutX="28.0" layoutY="223.0" onMouseClicked="#openResultPopUp" prefHeight="565.0" prefWidth="1157.0" />
      </children>
 </AnchorPane>

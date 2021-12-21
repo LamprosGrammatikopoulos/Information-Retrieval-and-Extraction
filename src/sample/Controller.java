@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.tartarus.snowball.ext.EnglishStemmer;
 
@@ -20,12 +21,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
-public class Controller{
+public class Controller {
 
     ObservableList observableList = FXCollections.observableArrayList();
 
     @FXML
-    private ListView<String> ListView;
+    public ListView<String> ListView;
 
     @FXML
     private TextField SearchText;
@@ -47,6 +48,59 @@ public class Controller{
     public static int intTopK = 0;
 
 
+    public void clickableFields() throws Exception {
+        ListView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+            @Override
+            public ListCell<String> call(ListView<String> param) {
+                return new ListCell<String>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if (item == null || empty) {
+                            setText(null);
+                            setStyle("-fx-control-inner-background: white ;");
+                        }
+                        else {
+                            if (getIndex() % 4 == 0) {
+                                setText(item);
+                                setMouseTransparent(false);
+                                setStyle("-fx-text-fill: blue; -fx-font: normal bold 20px 'serif'");
+                            }
+                            else if (getIndex() % 4 == 1) {
+                                setText(item);
+                                setStyle("-fx-text-fill: green;");
+                                setMouseTransparent(true);
+                            }
+                            else {
+                                setText(item);
+                                setMouseTransparent(true);
+                                setStyle("");
+                            }
+
+                        }
+                    }
+                };
+            }
+        });
+    }
+
+    @FXML
+    public void openResultPopUp(javafx.scene.input.MouseEvent mouseEvent) {
+        String selected = ListView.getSelectionModel().getSelectedItem();
+        String choosenFile = selected;
+        try {
+            if (choosenFile != null) {
+                DisplayArticles("Show-article.fxml", choosenFile);
+            }
+            else {
+                System.out.println("Please click on the article path.");
+            }
+        }
+        catch(Exception e) {
+            System.out.println("An error has occurred while editing the file!");
+        }
+    }
 
     @FXML
     public void CloseHelp(ActionEvent event) {
@@ -65,7 +119,7 @@ public class Controller{
             stage.show();
         }
         catch (IOException e){
-            System.out.println("errorHelp");
+            System.out.println("Error displaying help.");
         }
     }
 
@@ -106,7 +160,7 @@ public class Controller{
 
     @FXML
     public void Search(ActionEvent event) {
-
+        ListView.getItems().clear();
         if (TopK.getText().matches("^[0-9]+$")) {
 
             intTopK = Integer.parseInt(TopK.getText());
@@ -132,9 +186,11 @@ public class Controller{
                     stemmer.stem();
                     String tmp = stemmer.getCurrent();
 
+                    //Date
                     if (tmp.contains("/")) {
                         tmp = tmp.replaceAll("/", ";");
                     }
+                    //Time
                     if (tmp.contains(":")) {
                         tmp = tmp.replaceAll(":", ";");
                     }
@@ -142,7 +198,9 @@ public class Controller{
                     System.out.println("stemQuery==>"+tmp);
 
                     observableList = LuceneTester.search(tmp, intTopK);
-                    ListView.setItems(observableList);
+                    ListView.getItems().addAll(observableList);
+                    ListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+                    clickableFields();
                 }
                 else {
                     Alert a = new Alert(Alert.AlertType.ERROR);
@@ -155,6 +213,9 @@ public class Controller{
                 e.printStackTrace();
             }
             catch (ParseException e) {
+                e.printStackTrace();
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -221,76 +282,19 @@ public class Controller{
     @FXML
     public void Edit(ActionEvent event) {
         try {
-
             FileChooser fileChooser = new FileChooser();
             fileChooser.setInitialDirectory(new File("res/Data"));
             File selectedFile = fileChooser.showOpenDialog(null);
             System.out.println("Editing: " + selectedFile);
 
             if (selectedFile != null) {
-
                 String choosenFile = selectedFile.getPath();
-
-                String tmp = "";
-
-                File file = new File(choosenFile);
-                //index file contents
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                String currentLine = "";
-                String bodyText = "";
-
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("Edit-popup.fxml"));
-                Parent root = loader.load();
-                Controller2 scene2controller = loader.getController();
-
-                int lineCounter = 0;
-                while ((currentLine = br.readLine()) != null) {
-
-                    currentLine = currentLine.toString();
-
-                    //Tags Removal
-                    //Supposing that <PLACES></PLACES>, <PEOPLE></PEOPLE>, <TITLE></TITLE> are one line each
-                    //First line in txt (<PLACES></PLACES>)
-                    if(lineCounter == 0) {
-                        currentLine = currentLine.substring(8,currentLine.length()-9);
-                        scene2controller.fillPlaces(currentLine,choosenFile);
-                    }
-                    //Second line in txt (<PEOPLE></PEOPLE>)
-                    else if(lineCounter == 1) {
-                        currentLine = currentLine.substring(8,currentLine.length()-9);
-                        scene2controller.fillPeople(currentLine,choosenFile);
-                    }
-                    //Third line in txt (<TITLE></TITLE>)
-                    else if(lineCounter == 2) {
-                        currentLine = currentLine.substring(7,currentLine.length()-8);
-                        scene2controller.fillTitle(currentLine,choosenFile);
-                    }
-                    //Fourth line in txt (<BODY></BODY>)
-                    else if(lineCounter == 3 && currentLine.contains("</BODY>")) {
-                        currentLine = currentLine.substring(6,currentLine.length()-7);
-                        bodyText=bodyText+currentLine+"\n";
-                        scene2controller.fillBody(bodyText,choosenFile);
-                        break;
-                    }
-                    //Last line in txt (<BODY>)
-                    else if (lineCounter >= 3 && !currentLine.contains("</BODY>")) {
-                        if (currentLine.contains("<BODY>")) {
-                            currentLine = currentLine.substring(6);
-                        }
-                        bodyText=bodyText+currentLine+"\n";
-                    }
-                    //Last line in txt (</BODY>)
-                    else if (currentLine.contains("\u0003</BODY>")) {
-                        scene2controller.fillBody(bodyText,choosenFile);
-                        break;
-                    }
-
-                    lineCounter++;
+                try {
+                    DisplayArticles("Edit-popup.fxml", choosenFile);
                 }
-
-                Stage stage = new Stage();
-                stage.setScene(new Scene(root));
-                stage.show();
+                catch(Exception e) {
+                    System.out.println("An error has occurred while editing the file!");
+                }
             }
             else {
                 System.out.println("Txt file selection cancelled.");
@@ -298,8 +302,69 @@ public class Controller{
         }
         catch(Exception e) {
             e.printStackTrace();
-            System.out.println("An ERROR occurred while editing the file!");
+            System.out.println("An error has occurred while editing the file!");
         }
+    }
+
+    public void DisplayArticles(String fmxl, String choosenFile) throws IOException {
+        File file = new File(choosenFile);
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(fmxl));
+        Parent root = loader.load();
+        Controller2 scene2controller = loader.getController();
+
+        //index file contents
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String currentLine = "";
+        String bodyText = "";
+
+        int lineCounter = 0;
+        while ((currentLine = br.readLine()) != null) {
+
+            currentLine = currentLine.toString();
+
+            //Tags Removal
+            //Supposing that <PLACES></PLACES>, <PEOPLE></PEOPLE>, <TITLE></TITLE> are one line each
+            //First line in txt (<PLACES></PLACES>)
+            if(lineCounter == 0) {
+                currentLine = currentLine.substring(8,currentLine.length()-9);
+                scene2controller.fillPlaces(currentLine,choosenFile);
+            }
+            //Second line in txt (<PEOPLE></PEOPLE>)
+            else if(lineCounter == 1) {
+                currentLine = currentLine.substring(8,currentLine.length()-9);
+                scene2controller.fillPeople(currentLine,choosenFile);
+            }
+            //Third line in txt (<TITLE></TITLE>)
+            else if(lineCounter == 2) {
+                currentLine = currentLine.substring(7,currentLine.length()-8);
+                scene2controller.fillTitle(currentLine,choosenFile);
+            }
+            //Fourth line in txt (<BODY></BODY>)
+            else if(lineCounter == 3 && currentLine.contains("</BODY>")) {
+                currentLine = currentLine.substring(6,currentLine.length()-7);
+                bodyText=bodyText+currentLine+"\n";
+                scene2controller.fillBody(bodyText,choosenFile);
+                break;
+            }
+            //Last line in txt (<BODY>)
+            else if (lineCounter >= 3 && !currentLine.contains("</BODY>")) {
+                if (currentLine.contains("<BODY>")) {
+                    currentLine = currentLine.substring(6);
+                }
+                bodyText=bodyText+currentLine+"\n";
+            }
+            //Last line in txt (</BODY>)
+            else if (currentLine.contains("\u0003</BODY>")) {
+                scene2controller.fillBody(bodyText,choosenFile);
+                break;
+            }
+
+            lineCounter++;
+        }
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root));
+        stage.show();
     }
 }
 
