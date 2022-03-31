@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="WEKA:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/WEKA_jar</output-path>
+    <root id="archive" name="WEKA.jar">
+      <element id="module-output" name="WEKA" />
+    </root>
+  </artifact>
+</component>
